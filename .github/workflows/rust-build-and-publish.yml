@@ -27,22 +27,16 @@ jobs:
       matrix:
         target:
           - x86_64-unknown-linux-musl
-          - arm-unknown-linux-musleabihf
-          - aarch64-unknown-linux-musl
       fail-fast: true
     steps:
-      - uses: actions/checkout@v3
       - uses: actions/checkout@v3
         with:
           repository: starship/starship.git
           ref: ${{ env.PACKAGE_VERSION }}
-          path: starship
       - run: rustup toolchain install stable --profile minimal
       - name: Rust Cache
         uses: Swatinem/rust-cache@v2
-        working-directory: ./starship
       - uses: actions-rs/cargo@v1
-        working-directory: ./starship
         with:
           command: build
           use-cross: true
