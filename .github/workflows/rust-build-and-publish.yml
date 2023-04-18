@@ -1,0 +1,100 @@
+---
+env:
+  PACKAGE_NAME: starship
+  PACKAGE_VERSION: v1.13.1
+  PACKAGE_DESCRIPTION: The minimal, blazing-fast, and infinitely customizable prompt for any shell!
+  BINARY_NAME: starship
+
+name: Build, package and upload
+"on":
+  push:
+    paths-ignore:
+      - "*.md"
+      - LICENSE
+      - .github/renovate.json
+      - .gitignore
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        target:
+          - x86_64-unknown-linux-musl
+          - arm-unknown-linux-musleabihf
+          - aarch64-unknown-linux-musl
+      fail-fast: true
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/checkout@v3
+        with:
+          repository: starship/starship.git
+          ref: ${{ env.PACKAGE_VERSION }}
+          path: starship
+      - run: rustup toolchain install stable --profile minimal
+      - name: Rust Cache
+        uses: Swatinem/rust-cache@v2
+        working-directory: ./starship
+      - uses: actions-rs/cargo@v1
+        working-directory: ./starship
+        with:
+          command: build
+          use-cross: true
+          args: --release --target=${{ matrix.target }}
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: target
+          path: target/**/release/${{ env.BINARY_NAME }}
+  build-package:
+    name: Build Deb Package
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          bundler-cache: true
+      - name: Download build artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: target
+      - name: Package
+        run: |
+          find .. -type f \( -name "powerline" -o -name "powerline-bare" \) -exec chmod +x {} \;
+          for build in amd64,x86_64-unknown-linux-musl armhf,arm-unknown-linux-musleabihf aarch64,aarch64-unknown-linux-musl; do
+            IFS=',' read arch target <<< "${build}";
+            bundle exec fpm -f \
+            -s dir \
+            -t deb \
+            --deb-priority optional \
+            --maintainer github@growse.com \
+            --vendor https://starship.rs \
+            --license ISC \
+            -n $DEB_NAME \
+            --description "$APPDESCRIPTION" \
+            --url $APPURL \
+            --prefix / \
+            -a ${arch} \
+            -v $PACKAGE_VERSION \
+            ../${target}/release/starship=/usr/bin/starship
+          done
+        env:
+          DEB_NAME: ${{ env.PACKAGE_NAME }}
+          APP_DESCRIPTION: ${{ env.PACKAGE_DESCRIPTION }}
+          APP_URL: https://starship.rs
+          DEB_ARCH: ${{ env.PACKAGE_ARCH }}
+          PACKAGE_VERSION: ${{ env.PACKAGE_VERSION }}
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: deb-package
+          path: "packaging/*.deb"
