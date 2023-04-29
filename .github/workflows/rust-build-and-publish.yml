@@ -27,8 +27,6 @@ jobs:
       matrix:
         target:
           - x86_64-unknown-linux-musl
-          - arm-unknown-linux-musleabihf
-          - aarch64-unknown-linux-musl
       fail-fast: true
     steps:
       - uses: actions/checkout@v3
@@ -51,6 +49,11 @@ jobs:
   build-package:
     name: Build Deb Package
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        rust_arch:
+          - x86_64-unknown-linux-musl
+      fail-fast: true
     needs: build
     steps:
       - name: Check out code
@@ -65,30 +68,31 @@ jobs:
           name: target
       - name: Package
         run: |
-          for build in amd64,x86_64-unknown-linux-musl armhf,arm-unknown-linux-musleabihf aarch64,aarch64-unknown-linux-musl; do
-            IFS=',' read arch target <<< "${build}";
-            chmod ${target}/release/starship
-            echo "Arch=${arch} Target=${target}"
-            bundle exec fpm -f \
-            -s dir \
-            -t deb \
-            --deb-priority optional \
-            --maintainer github@growse.com \
-            --vendor https://starship.rs \
-            --license ISC \
-            -n $DEB_NAME \
-            --description "$APPDESCRIPTION" \
-            --url $APPURL \
-            --prefix / \
-            -a ${arch} \
-            -v $PACKAGE_VERSION \
-            ${target}/release/starship=/usr/bin/starship
-          done
+          case ${ARCH} in
+            x86_64-unknown-linux-musl)
+            export DEB_ARCH=amd64;;
+          esac
+          chmod +x ${ARCH}/release/starship
+          echo "Arch=${ARCH} DEBARCH=${DEB_ARCH}"
+          bundle exec fpm -f \
+          -s dir \
+          -t deb \
+          --deb-priority optional \
+          --maintainer github@growse.com \
+          --vendor https://starship.rs \
+          --license ISC \
+          -n $DEB_NAME \
+          --description "$APPDESCRIPTION" \
+          --url $APPURL \
+          --prefix / \
+          -a ${DEB_ARCH} \
+          -v $PACKAGE_VERSION \
+          ${ARCH}/release/starship=/usr/bin/starship
         env:
           DEB_NAME: ${{ env.PACKAGE_NAME }}
           APP_DESCRIPTION: ${{ env.PACKAGE_DESCRIPTION }}
           APP_URL: https://starship.rs
-          DEB_ARCH: ${{ env.PACKAGE_ARCH }}
+          ARCH: ${{ matrix.rust_arch }}
           PACKAGE_VERSION: ${{ env.PACKAGE_VERSION }}
       - name: Upload build artifact
         uses: actions/upload-artifact@v3
