@@ -64,6 +64,7 @@ jobs:
       - name: Package
         run: |
           find .. -type f \( -name "starship" \) -exec chmod +x {} \;
+          bundle exec fpm
           for build in amd64,x86_64-unknown-linux-musl armhf,arm-unknown-linux-musleabihf aarch64,aarch64-unknown-linux-musl; do
             IFS=',' read arch target <<< "${build}";
             bundle exec fpm -f \
