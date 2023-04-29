@@ -63,8 +63,8 @@ jobs:
           name: target
       - name: Package
         run: |
-          find .. -type f \( -name "starship" \) -exec chmod +x {} \;
-          bundle exec fpm
+          find . -type f -name "starship"
+          find . -type f -name "starship" -exec chmod +x {} \;
           for build in amd64,x86_64-unknown-linux-musl armhf,arm-unknown-linux-musleabihf aarch64,aarch64-unknown-linux-musl; do
             IFS=',' read arch target <<< "${build}";
             bundle exec fpm -f \
@@ -80,7 +80,7 @@ jobs:
             --prefix / \
             -a ${arch} \
             -v $PACKAGE_VERSION \
-            ../${target}/release/starship=/usr/bin/starship
+            target/${target}/release/starship=/usr/bin/starship
           done
         env:
           DEB_NAME: ${{ env.PACKAGE_NAME }}
