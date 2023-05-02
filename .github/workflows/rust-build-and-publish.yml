@@ -74,7 +74,7 @@ jobs:
           esac
           chmod +x ${ARCH}/release/starship
           echo "Arch=${ARCH} DEBARCH=${DEB_ARCH}"
-          bundle exec fpm -f \
+          echo bundle exec fpm -f \
           -s dir \
           -t deb \
           --deb-priority optional \
