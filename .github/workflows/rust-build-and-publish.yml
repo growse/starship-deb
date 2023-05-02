@@ -97,4 +97,26 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: deb-package
-          path: "packaging/*.deb"
+          path: "*.deb"
+  publish:
+    name: Publish
+    runs-on: ubuntu-latest
+    if: github.event_name != 'pull_request'
+    needs: build-package
+    steps:
+      - name: Download build artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: deb-package
+      - name: Upload to Apt repo
+        env:
+          APT_CREDENTIALS: ${{ secrets.APT_CREDENTIALS }}
+          APT_KEY_PASSPHRASE: ${{ secrets.APT_KEY_PASSPHRASE }}
+        run: |
+          echo $APT_CREDENTIALS > aptly-auth
+          find -type f -name "*.deb" -exec curl -f --netrc-file aptly-auth -XPOST -F file=@{} https://apttoo.growse.com/api/files/starship \;
+          export result=$(curl -f --netrc-file aptly-auth -X POST https://apttoo.growse.com/api/repos/defaultrepo/file/starship)
+          echo $result
+          export failed=$(echo $result | jq '.FailedFiles | length')
+          if [[ "$failed" != "0" ]]; then exit 1; fi
+          curl -f --netrc-file aptly-auth -X PUT -H"Content-type: application/json" --data '{"Signing":{"Passphrase":"'"$APT_KEY_PASSPHRASE"'","Batch":true}}' https://apttoo.growse.com/api/publish/:./stablish
