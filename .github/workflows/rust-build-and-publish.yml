@@ -1,7 +1,7 @@
 ---
 env:
   PACKAGE_NAME: starship
-  PACKAGE_VERSION: v1.13.1
+  PACKAGE_VERSION: v1.14.1
   PACKAGE_DESCRIPTION: The minimal, blazing-fast, and infinitely customizable prompt for any shell!
   BINARY_NAME: starship
 
