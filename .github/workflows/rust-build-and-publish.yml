@@ -35,14 +35,12 @@ jobs:
         with:
           repository: starship/starship.git
           ref: ${{ env.PACKAGE_VERSION }}
-      - run: rustup toolchain install stable --profile minimal
+      - run: rustup update
+      - run: cargo install cross
       - name: Rust Cache
         uses: Swatinem/rust-cache@v2
-      - uses: actions-rs/cargo@v1
-        with:
-          command: build
-          use-cross: true
-          args: --release --target=${{ matrix.target }}
+      - name: cargo build
+        run: cross build --release --target=${{ matrix.target }}
       - name: Upload build artifact
         uses: actions/upload-artifact@v3
         with:
