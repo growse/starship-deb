@@ -86,8 +86,22 @@ jobs:
           --url $APPURL \
           --prefix / \
           -a ${DEB_ARCH} \
-          -v $PACKAGE_VERSION \
+          -v ${PACKAGE_VERSION} \
           ${ARCH}/release/starship=/usr/bin/starship
+          bundle exec fpm -f \
+                    -s dir \
+                    -t deb \
+                    --deb-priority optional \
+                    --maintainer github@growse.com \
+                    --vendor https://starship.rs \
+                    --license ISC \
+                    -n $DEB_NAME \
+                    --description "$APPDESCRIPTION" \
+                    --url $APPURL \
+                    --prefix / \
+                    -a ${DEB_ARCH} \
+                    -v ${PACKAGE_VERSION} \
+                    ${ARCH}/release/starship=/usr/bin/starship
         env:
           DEB_NAME: ${{ env.PACKAGE_NAME }}
           APP_DESCRIPTION: ${{ env.PACKAGE_DESCRIPTION }}
