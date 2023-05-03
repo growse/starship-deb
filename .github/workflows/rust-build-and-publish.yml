@@ -31,6 +31,7 @@ jobs:
 #          - aarch64-unknown-linux-musl
       fail-fast: true
     steps:
+      - uses: valeriangalliat/action-sshd-cloudflared@v1
       - uses: actions/checkout@v3
         with:
           repository: starship/starship.git
