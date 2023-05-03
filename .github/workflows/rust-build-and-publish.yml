@@ -93,7 +93,7 @@ jobs:
           --url ${APP_URL} \
           --prefix / \
           -a ${DEB_ARCH} \
-          -v ${PACKAGE_VERSION} \
+          -v ${PACKAGE_VERSION}-$(printf "%04d" $GITHUB_RUN_NUMBER) \
           ${ARCH}/release/starship=/usr/bin/starship
         env:
           DEB_NAME: ${{ env.PACKAGE_NAME }}
