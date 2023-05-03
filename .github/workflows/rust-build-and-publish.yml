@@ -46,7 +46,7 @@ jobs:
       - name: Upload build artifact
         uses: actions/upload-artifact@v3
         with:
-          name: target
+          name: binaries
           path: target/**/release/${{ env.BINARY_NAME }}
   build-package:
     name: Build Deb Package
@@ -69,7 +69,7 @@ jobs:
       - name: Download build artifact
         uses: actions/download-artifact@v3
         with:
-          name: target
+          name: binaries
       - name: Package
         run: |
           case ${ARCH} in
@@ -127,4 +127,4 @@ jobs:
           echo $result
           export failed=$(echo $result | jq '.FailedFiles | length')
           if [[ "$failed" != "0" ]]; then exit 1; fi
-          curl -f --netrc-file aptly-auth -X PUT -H"Content-type: application/json" --data '{"Signing":{"Passphrase":"'"$APT_KEY_PASSPHRASE"'","Batch":true}}' https://apttoo.growse.com/api/publish/:./stablish
+          curl -f --netrc-file aptly-auth -X PUT -H"Content-type: application/json" --data '{"ForceOverwrite":true,"Signing":{"Passphrase":"'"$APT_KEY_PASSPHRASE"'","Batch":true}}' https://apttoo.growse.com/api/publish/:./stablish
