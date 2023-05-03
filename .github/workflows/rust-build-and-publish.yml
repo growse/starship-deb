@@ -36,8 +36,10 @@ jobs:
           repository: starship/starship.git
           ref: ${{ env.PACKAGE_VERSION }}
       - run: rustup update
-#      - name: Rust Cache
-#        uses: Swatinem/rust-cache@v2
+      - name: Rust Cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          key: ${{ matrix.target }}
       - run: cargo install cross
       - name: cargo build
         run: cross build --release --target=${{ matrix.target }}
