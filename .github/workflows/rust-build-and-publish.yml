@@ -22,24 +22,24 @@ name: Build, package and upload
 jobs:
   build:
     name: Build
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     strategy:
       matrix:
         target:
-          - x86_64-unknown-linux-musl
+#          - x86_64-unknown-linux-musl
           - arm-unknown-linux-musleabihf
-          - aarch64-unknown-linux-musl
+#          - aarch64-unknown-linux-musl
       fail-fast: true
     steps:
-      - run: dpkg --list | grep libc
       - uses: actions/checkout@v3
         with:
           repository: starship/starship.git
           ref: ${{ env.PACKAGE_VERSION }}
-      - run: rustup update
-      - run: cargo install cross
+#      - run: rustup update
       - name: Rust Cache
         uses: Swatinem/rust-cache@v2
+      - run: ls -laht
+      - run: cargo install cross
       - name: cargo build
         run: cross build --release --target=${{ matrix.target }}
       - name: Upload build artifact
