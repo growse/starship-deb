@@ -37,7 +37,7 @@ jobs:
           ref: ${{ env.PACKAGE_VERSION }}
       - run: rustup update
       - name: Rust Cache
-        uses: Swatinem/rust-cache@a95ba195448af2da9b00fb742d14ffaaf3c21f43 # v2
+        uses: Swatinem/rust-cache@a22603398250b864f7190077025cf752307154dc # v2
         with:
           key: ${{ matrix.target }}
       - run: cargo install cross
