@@ -31,7 +31,7 @@ jobs:
           - aarch64-unknown-linux-musl
       fail-fast: true
     steps:
-      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           repository: starship/starship.git
           ref: ${{ env.PACKAGE_VERSION }}
@@ -61,7 +61,7 @@ jobs:
     needs: build
     steps:
       - name: Check out code
-        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
